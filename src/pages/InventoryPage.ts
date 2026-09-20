@@ -1,29 +1,21 @@
 import type { Locator, Page } from '@playwright/test';
 import { BasePage } from './BasePage';
-import { CartPage } from './CartPage';
+import { PageFactory } from './PageFactory';
+import type { CartPage } from './CartPage';
 
-export class InventoryPage extends BasePage {
-  private readonly inventoryItems: Locator;
-  private readonly cartIcon: Locator;
-  private readonly cartBadge: Locator;
-  private readonly sortDropdown: Locator;
-  private readonly pageTitle: Locator;
+export class InventoryPage extends BasePage<'InventoryPage'> {
+  protected readonly pageName = 'InventoryPage' as const;
 
   constructor(page: Page) {
     super(page);
-    this.inventoryItems = page.locator('.inventory_item');
-    this.cartIcon = page.locator('.shopping_cart_link');
-    this.cartBadge = page.locator('.shopping_cart_badge');
-    this.sortDropdown = page.locator('[data-test="product-sort-container"]');
-    this.pageTitle = page.locator('.title');
   }
 
   async getPageTitle(): Promise<string> {
-    return this.textOf(this.pageTitle);
+    return this.textOf(this.el('pageTitle'));
   }
 
   itemByName(name: string): Locator {
-    return this.inventoryItems.filter({ hasText: name });
+    return this.el('inventoryItems').filter({ hasText: name });
   }
 
   async addItemToCart(name: string): Promise<void> {
@@ -37,20 +29,23 @@ export class InventoryPage extends BasePage {
   }
 
   async getCartCount(): Promise<number> {
-    if (!(await this.cartBadge.isVisible())) return 0;
-    return Number(await this.textOf(this.cartBadge));
+    const badge = this.el('cartBadge');
+    if (!(await badge.isVisible())) return 0;
+    return Number(await this.textOf(badge));
   }
 
   async sortBy(option: 'az' | 'za' | 'lohi' | 'hilo'): Promise<void> {
-    await this.sortDropdown.selectOption(option);
+    await this.el('sortDropdown').selectOption(option);
   }
 
   async goToCart(): Promise<CartPage> {
-    await this.click(this.cartIcon);
-    return new CartPage(this.page);
+    await this.click(this.el('cartIcon'));
+    return PageFactory.create<CartPage>('CartPage', this.page);
   }
 
   getItemCount(): Promise<number> {
-    return this.inventoryItems.count();
+    return this.el('inventoryItems').count();
   }
 }
+
+PageFactory.register('InventoryPage', InventoryPage);

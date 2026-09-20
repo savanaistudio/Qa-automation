@@ -1,10 +1,19 @@
 import type { Locator, Page } from '@playwright/test';
+import { locators, type ElementName, type PageName } from '@locators/locators';
 
-export abstract class BasePage {
+export abstract class BasePage<P extends PageName = PageName> {
   protected readonly page: Page;
+  protected abstract readonly pageName: P;
 
   constructor(page: Page) {
     this.page = page;
+  }
+
+  /** Look up an element by name from locators.ts instead of hardcoding a selector. */
+  protected el(name: ElementName<P>): Locator {
+    const pageLocators = locators[this.pageName] as Record<string, string>;
+    const selector = pageLocators[name];
+    return this.page.locator(selector);
   }
 
   async goto(path = '/'): Promise<void> {

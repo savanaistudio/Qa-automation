@@ -7,7 +7,8 @@ Example tests target [saucedemo.com](https://www.saucedemo.com), a public site m
 
 ```
 src/
-  pages/        Page Objects (BasePage + one class per page/screen)
+  pages/        Page Objects (BasePage + one class per page/screen) + PageFactory
+  locators/     locators.ts — every selector, grouped by page, in one file
   fixtures/     Playwright test fixtures that inject page objects into tests
   data/         Static test data (users, products, etc.)
   utils/        Shared helper functions
@@ -16,13 +17,48 @@ tests/          Test specs, grouped by feature
 
 ### Page Object Model
 
-Every page extends `BasePage`, which holds shared navigation/interaction helpers.
-Each page object exposes locators as private fields and public methods that describe
-user actions (`login()`, `addItemToCart()`, `checkout()`), never raw locators — tests
-never touch selectors directly.
+Every page extends `BasePage<'YourPageName'>`, which holds shared navigation/interaction
+helpers plus `el(name)` — a lookup into `src/locators/locators.ts` by element name, so no
+page class hardcodes a CSS selector. Each page object exposes only action/query methods
+(`login()`, `addItemToCart()`, `checkout()`) — tests never touch selectors directly.
 
-Fixtures (`src/fixtures/pages.fixture.ts`) wire page objects into tests, so specs just
-declare what they need:
+**One file for every selector** — `src/locators/locators.ts` maps page name → element
+name → selector:
+
+```ts
+export const locators = {
+  LoginPage: {
+    usernameInput: '#user-name',
+    passwordInput: '#password',
+    loginButton: '#login-button',
+  },
+  // ...
+} as const;
+```
+
+A page object then does `this.el('usernameInput')` instead of `page.locator('#user-name')`.
+To support a new site or page version, edit this one file — no page class changes needed.
+
+**Pages connect to each other by name, not by import** — `PageFactory`
+(`src/pages/PageFactory.ts`) is a name → class registry. Each page self-registers at the
+bottom of its own file (`PageFactory.register('InventoryPage', InventoryPage)`), so a page's
+action method returns the next (or previous) page just by naming it:
+
+```ts
+async login(username: string, password: string): Promise<InventoryPage> {
+  await this.fill(this.el('usernameInput'), username);
+  await this.fill(this.el('passwordInput'), password);
+  await this.click(this.el('loginButton'));
+  return PageFactory.create<InventoryPage>('InventoryPage', this.page);
+}
+```
+
+Pages only ever reference each other via `import type` (erased at compile time) for the
+return-type annotation, plus the string name at runtime — so there's no import cycle even
+though Login → Inventory → Cart → Inventory all link back and forth.
+
+Fixtures (`src/fixtures/pages.fixture.ts`) import every page class (which also makes them
+self-register) and wire them into tests, so specs just declare what they need:
 
 ```ts
 test('adds an item to the cart', async ({ loginPage, inventoryPage }) => {
@@ -57,11 +93,13 @@ npm test
 
 ## Adding a new page object
 
-1. Create `src/pages/YourPage.ts` extending `BasePage`.
-2. Declare locators as `private readonly` fields in the constructor.
-3. Expose action/query methods only — keep selectors private.
-4. Register it in `src/fixtures/pages.fixture.ts` so tests can request it.
-5. Write specs under `tests/`, importing `test`/`expect` from `@fixtures/pages.fixture`.
+1. Add its elements to `src/locators/locators.ts`: `YourPage: { someButton: '#some-id' }`.
+2. Create `src/pages/YourPage.ts` extending `BasePage<'YourPage'>`, set `protected readonly pageName = 'YourPage' as const`.
+3. Expose action/query methods that call `this.el('someButton')` — keep selectors out of the class.
+4. If another page should navigate to it, call `PageFactory.create<YourPage>('YourPage', this.page)` and add `import type { YourPage } from './YourPage'`.
+5. At the bottom of the file, self-register: `PageFactory.register('YourPage', YourPage)`.
+6. Add it to `src/fixtures/pages.fixture.ts` so tests can request it (this import also triggers self-registration).
+7. Write specs under `tests/`, importing `test`/`expect` from `@fixtures/pages.fixture`.
 
 ## CI
 
