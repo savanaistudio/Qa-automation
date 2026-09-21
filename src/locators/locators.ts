@@ -22,6 +22,15 @@ export const locators = {
     checkoutButton: '[data-test="checkout"]',
     continueShoppingButton: '[data-test="continue-shopping"]',
   },
+  CheckoutInfoPage: {
+    pageTitle: '.title',
+    firstNameInput: '[data-test="firstName"]',
+    lastNameInput: '[data-test="lastName"]',
+    postalCodeInput: '[data-test="postalCode"]',
+    continueButton: '[data-test="continue"]',
+    cancelButton: '[data-test="cancel"]',
+    errorMessage: '[data-test="error"]',
+  },
 } as const;
 
 export type PageLocators = typeof locators;

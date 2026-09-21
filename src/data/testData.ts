@@ -17,6 +17,12 @@ export const users = {
   },
 } as const;
 
+export const customer = {
+  firstName: 'Savan',
+  lastName: 'Patel',
+  postalCode: '380015',
+} as const;
+
 export const products = {
   backpack: 'Sauce Labs Backpack',
   bikeLight: 'Sauce Labs Bike Light',
