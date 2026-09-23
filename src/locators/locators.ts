@@ -43,11 +43,6 @@ export const locators = {
     completeText: '[data-test="complete-text"]',
     backHomeButton: '[data-test="back-to-products"]',
   },
-  mycartPage: {
-    removeItems: '#remove-sauce-labs-bolt-t-shirt',
-    continueShoppingButton: '[data-test="continue-shopping"]',
-    checkourButton: '#checkout',
-  },
 } as const;
 
 export type PageLocators = typeof locators;
