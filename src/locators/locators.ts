@@ -22,6 +22,32 @@ export const locators = {
     checkoutButton: '[data-test="checkout"]',
     continueShoppingButton: '[data-test="continue-shopping"]',
   },
+  CheckoutInfoPage: {
+    firstNameInput: '[data-test="firstName"]',
+    lastNameInput: '[data-test="lastName"]',
+    postalCodeInput: '[data-test="postalCode"]',
+    continueButton: '[data-test="continue"]',
+    cancelButton: '[data-test="cancel"]',
+    errorMessage: '[data-test="error"]',
+  },
+  CheckoutOverviewPage: {
+    cartItems: '.cart_item',
+    itemPrices: '.inventory_item_price',
+    subtotalLabel: '[data-test="subtotal-label"]',
+    taxLabel: '[data-test="tax-label"]',
+    totalLabel: '[data-test="total-label"]',
+    finishButton: '[data-test="finish"]',
+  },
+  CheckoutCompletePage: {
+    completeHeader: '[data-test="complete-header"]',
+    completeText: '[data-test="complete-text"]',
+    backHomeButton: '[data-test="back-to-products"]',
+  },
+  mycartPage: {
+    removeItems: '#remove-sauce-labs-bolt-t-shirt',
+    continueShoppingButton: '[data-test="continue-shopping"]',
+    checkourButton: '#checkout',
+  },
 } as const;
 
 export type PageLocators = typeof locators;
