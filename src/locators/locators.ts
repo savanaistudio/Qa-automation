@@ -23,6 +23,7 @@ export const locators = {
     continueShoppingButton: '[data-test="continue-shopping"]',
   },
   CheckoutInfoPage: {
+    pageTitle: '.title',
     firstNameInput: '[data-test="firstName"]',
     lastNameInput: '[data-test="lastName"]',
     postalCodeInput: '[data-test="postalCode"]',

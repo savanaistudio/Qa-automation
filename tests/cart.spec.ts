@@ -24,7 +24,7 @@ test.describe('Cart', () => {
     await inventoryPage.addItemToCart(products.bikeLight);
     const cartPage = await inventoryPage.goToCart();
 
-    expect(await cartPage.getItemCount()).toBe(1);
+    await expect.poll(() => cartPage.getItemCount()).toBe(1);
     await expect(cartPage.itemByName(products.bikeLight)).toBeVisible();
   });
 

@@ -23,6 +23,8 @@ export const checkoutInfo = {
   postalCode: '380001',
 } as const;
 
+export const customer = checkoutInfo;
+
 export const products = {
   backpack: 'Sauce Labs Backpack',
   bikeLight: 'Sauce Labs Bike Light',
